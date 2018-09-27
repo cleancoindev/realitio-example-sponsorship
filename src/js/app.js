@@ -5,18 +5,18 @@ App = {
   init: function() {
     // Load pets.
     $.getJSON('../pets.json', function(data) {
-      var petsRow = $('#petsRow');
-      var petTemplate = $('#petTemplate');
+      var bountyRow = $('#bountyRow');
 
       for (i = 0; i < data.length; i ++) {
-        petTemplate.find('.panel-title').text(data[i].name);
-        petTemplate.find('img').attr('src', data[i].picture);
-        petTemplate.find('.pet-breed').text(data[i].breed);
-        petTemplate.find('.pet-age').text(data[i].age);
-        petTemplate.find('.pet-location').text(data[i].location);
-        petTemplate.find('.btn-adopt').attr('data-id', data[i].id);
-
-        petsRow.append(petTemplate.html());
+        var bountyTemplate = $('#bountyTemplate').clone();
+        bountyTemplate.find('.panel-title').text(data[i].name);
+        bountyTemplate.find('img').attr('src', data[i].picture);
+        bountyTemplate.find('.btn-sponsor').attr('data-id', data[i].question_id);
+        bountyTemplate.find('.btn-sponsor').attr('data-developer', data[i].developer);
+        bountyTemplate.find('.btn-claim').attr('data-id', data[i].question_id);
+        bountyTemplate.attr('id', 'bounty-' + data[i].question_id);
+        bountyRow.append(bountyTemplate);
+        bountyTemplate.show();
       }
     });
 
@@ -38,49 +38,83 @@ App = {
 
   initContract: function() {
 
-    $.getJSON('Adoption.json', function(data) {
+    $.getJSON('Sponsorship.json', function(data) {
       // Get the necessary contract artifact file and instantiate it with truffle-contract
-      var AdoptionArtifact = data;
-      App.contracts.Adoption = TruffleContract(AdoptionArtifact);
+      var SponsorshipArtifact = data;
+      App.contracts.Sponsorship = TruffleContract(SponsorshipArtifact);
 
       // Set the provider for our contract
-      App.contracts.Adoption.setProvider(App.web3Provider);
+      App.contracts.Sponsorship.setProvider(App.web3Provider);
 
-      // Use our contract to retrieve and mark the adopted pets
-      return App.markAdopted();
+      var question_ids = [];
+      $.getJSON('../pets.json', function(data) {
+         var question_ids = []; 
+         for(var i=0; i<data.length; i++) {
+           question_ids.push(data[i].question_id);
+         }
+         return App.refreshDisplay(question_ids);
+      });
     });
 
     return App.bindEvents();
   },
 
   bindEvents: function() {
-    $(document).on('click', '.btn-adopt', App.handleAdopt);
+    $(document).on('click', '.btn-sponsor', App.handleSponsor);
+    $(document).on('click', '.btn-claim', App.handleClaim);
   },
 
-  markAdopted: function(adopters, account) {
-    var adoptionInstance;
+  refreshDisplay: function(question_ids) {
+    var sponsorInstance;
 
-    App.contracts.Adoption.deployed().then(function(instance) {
-      adoptionInstance = instance;
+    var populateEntry = function(qid, instance) {
+      //console.log('calling for question_id ', qid);
+      instance.bounties.call(qid).then(function(bounty_data) {
+        console.log(qid, bounty_data);
+        var developer = bounty_data[0]; 
+        var sponsor = bounty_data[1]; 
+        var amount = bounty_data[2]; 
+        if (amount.gt(0)) {
+          var panel = $('#bounty-' + qid);
 
-      return adoptionInstance.getAdopters.call();
-    }).then(function(adopters) {
-      for (i = 0; i < adopters.length; i++) {
-        if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-          $('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
+          panel.find('.unsponsored-display').hide();
+          panel.find('.sponsored-display').show();
+
+          panel.find('.developer').text(developer);
+          panel.find('.sponsor').text(sponsor);
+          panel.find('.amount-eth').text(web3.fromWei(amount, 'ether').toString());
+          panel.addClass('sponsored');
+
+          instance.isClaimable.call(qid).then(function(is_claimable) {
+            console.log(qid, 'is_claimable', is_claimable);
+            if (is_claimable) {
+               panel.addClass('claimable');
+               panel.find('.claim-display').show();
+            } else {
+               panel.addClass('unclaimable');
+            }
+          });
         }
+      });
+    }
+
+    App.contracts.Sponsorship.deployed().then(function(instance) {
+      for (var i=0; i<question_ids.length; i++) {
+        var question_id = question_ids[i];
+        populateEntry(question_id, instance);
       }
-    }).catch(function(err) {
-      console.log(err.message);
-    });
+    })
   },
 
-  handleAdopt: function(event) {
+  handleSponsor: function(event) {
     event.preventDefault();
 
-    var petId = parseInt($(event.target).data('id'));
+    var bountyId = $(event.target).data('id');
+    var developer = $(event.target).data('developer');
+    var amount_eth = $(event.target).closest('div').find('.amount-input').val();
+    var amount_wei = web3.toWei(amount_eth);
 
-    var adoptionInstance;
+    var sponsorInstance;
 
     web3.eth.getAccounts(function(error, accounts) {
       if (error) {
@@ -89,13 +123,40 @@ App = {
 
       var account = accounts[0];
 
-      App.contracts.Adoption.deployed().then(function(instance) {
-        adoptionInstance = instance;
+      App.contracts.Sponsorship.deployed().then(function(instance) {
+        sponsorInstance = instance;
 
         // Execute adopt as a transaction by sending account
-        return adoptionInstance.adopt(petId, {from: account});
+        return sponsorInstance.sponsor(bountyId, developer, {from: account, value: amount_wei});
       }).then(function(result) {
-        return App.markAdopted();
+        return App.refreshDisplay([bountyId]);
+      }).catch(function(err) {
+        console.log(err.message);
+      });
+    });
+
+  },
+
+  handleClaim: function(event) {
+    event.preventDefault();
+
+    var bountyId = $(event.target).data('id');
+    var sponsorInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+
+      App.contracts.Sponsorship.deployed().then(function(instance) {
+        sponsorInstance = instance;
+
+        // Execute adopt as a transaction by sending account
+        return sponsorInstance.claim(bountyId, {from: account});
+      }).then(function(result) {
+        return App.refreshDisplay([bountyId]);
       }).catch(function(err) {
         console.log(err.message);
       });
