@@ -4,7 +4,7 @@ App = {
 
   init: function() {
     // Load pets.
-    $.getJSON('../pets.json', function(data) {
+    $.getJSON('../sponsorships.json', function(data) {
       var bountyRow = $('#bountyRow');
 
       for (i = 0; i < data.length; i ++) {
@@ -47,7 +47,7 @@ App = {
       App.contracts.Sponsorship.setProvider(App.web3Provider);
 
       var question_ids = [];
-      $.getJSON('../pets.json', function(data) {
+      $.getJSON('../sponsorships.json', function(data) {
          var question_ids = []; 
          for(var i=0; i<data.length; i++) {
            question_ids.push(data[i].question_id);
