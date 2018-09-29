@@ -92,13 +92,6 @@ App = {
 
              if (amount.gt(0)) {
 
-                console.log(qid, 'is_claimable', is_claimable);
-                if (is_claimable) {
-                  panel.addClass('claimable');
-                  panel.find('.claim-display').show();
-                } 
-
-                panel.addClass('claimable');
                 panel.find('.claim-display').show();
 
              }
