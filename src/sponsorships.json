@@ -2,19 +2,19 @@
   {
     "question_id": "0x1d16cf93c0a73cb12c693cbb0606f15dc48c6f5dcc0383ec3f69b397698f239d",
     "name": "Realitio Japanese",
-    "picture": "images/scottish-terrier.jpeg",
+    "picture": "images/realitio_logo.jpg",
     "developer": "0xef547480a31b2bc8d93fea2b52df36f9c053406e"
   },
   {
     "question_id": "0x25d69d04791f966baf2490297afebb86b3be253f48a59bd606632faaa4ce806e",
     "name": "Augur v1",
-    "picture": "images/boxer.jpeg",
+    "picture": "images/augur-logo.svg",
     "developer": "0xef547480a31b2bc8d93fea2b52df36f9c053406e"
   },
   {
     "question_id": "0xf74c8faf6481d2707c4cb64bcabadf1ce714c92826cd4c02bdccacb2437c9fc5",
     "name": "Raiden Red Eyes release",
-    "picture": "images/boxer.jpeg",
+    "picture": "images/Raiden_Logo.png",
     "developer": "0xef547480a31b2bc8d93fea2b52df36f9c053406e"
   }
 
