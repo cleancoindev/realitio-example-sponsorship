@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Pete's Pet Shop</title>
+    <title>Project Bounties</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -21,7 +21,7 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-sm-8 col-sm-push-2">
-          <h1 class="text-center">Pete's Pet Shop</h1>
+          <h1 class="text-center">Project Bounties</h1>
           <hr/>
           <br/>
         </div>
@@ -41,7 +41,7 @@
           <div class="panel-body">
             <img alt="140x140" data-src="holder.js/140x140" class="img-rounded img-center" style="width: 100%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg" data-holder-rendered="true">
             <br/><br/>
-            <div class="unsponsored-display">
+            <div class="unsponsored-display" style="display:none">
                 <input class="amount-input" type="text" maxlength="8"/> ETH
                 <button class="btn btn-default btn-sponsor" type="button" data-id="0">Sponsor</button>
             </div>
@@ -55,6 +55,10 @@
 
                 Amount:
                 <span class="amount-eth"></span> ETH
+                <br />
+            </div>
+            <div class="question-status">
+                <span class="is-completed"></span>
             </div>
             <div class="claim-display" style="display:none">
                 <button class="btn btn-default btn-claim" type="button" data-id="0">Claim</button>

@@ -31,8 +31,8 @@ contract Sponsorship {
     }
 
     function claim(bytes32 question_id) public {
-        bytes32 answer = RealitioI(realitio).getFinalAnswer(question_id);
-        address claimer = (answer == bytes32(1)) ? bounties[question_id].developer : bounties[question_id].sponsor;
+        require(isFinalized(question_id));
+        address claimer = isMilestoneCompleted(question_id) ? bounties[question_id].developer : bounties[question_id].sponsor;
         claimer.transfer(bounties[question_id].amount);
         delete (bounties[question_id]);
     }
@@ -45,6 +45,15 @@ contract Sponsorship {
     function isClaimable(bytes32 question_id) public view returns (bool) {
         if (bounties[question_id].amount == 0) return false;
         return RealitioI(realitio).isFinalized(question_id);    
+    }
+
+    function isFinalized(bytes32 question_id) public view returns (bool) {
+        return RealitioI(realitio).isFinalized(question_id);
+    }
+
+    function isMilestoneCompleted(bytes32 question_id) public view returns (bool) {
+        bytes32 answer = RealitioI(realitio).getFinalAnswer(question_id);
+        return (answer == bytes32(1));
     }
 
 }

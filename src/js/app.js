@@ -74,17 +74,42 @@ App = {
         var developer = bounty_data[0]; 
         var sponsor = bounty_data[1]; 
         var amount = bounty_data[2]; 
-        if (amount.gt(0)) {
-          var panel = $('#bounty-' + qid);
+        var panel = $('#bounty-' + qid);
+        console.log('amount is ', amount.toString());
 
-          panel.find('.unsponsored-display').hide();
-          panel.find('.sponsored-display').show();
+        instance.isFinalized.call(qid).then(function(is_finalized) {
+          console.log(qid, 'is_finalized', is_finalized);
 
-          panel.find('.developer').text(developer);
-          panel.find('.sponsor').text(sponsor);
-          panel.find('.amount-eth').text(web3.fromWei(amount, 'ether').toString());
-          panel.addClass('sponsored');
+          if (is_finalized) {
 
+             instance.isMilestoneCompleted.call(qid).then(function(is_completed) {
+                if (is_completed) {
+                  panel.find('.is-completed').text('Completed!');
+                } else {
+                  panel.find('.is-completed').text('Failed!');
+                }
+             });
+
+             if (amount.gt(0)) {
+
+                console.log(qid, 'is_claimable', is_claimable);
+                if (is_claimable) {
+                  panel.addClass('claimable');
+                  panel.find('.claim-display').show();
+                } 
+
+                panel.addClass('claimable');
+                panel.find('.claim-display').show();
+
+             }
+/*
+            console.log(qid, 'is_finalized', is_finalized);
+            if (is_claimable) {
+               panel.addClass('claimable');
+               panel.find('.claim-display').show();
+            } else {
+               panel.addClass('unclaimable');
+            }
           instance.isClaimable.call(qid).then(function(is_claimable) {
             console.log(qid, 'is_claimable', is_claimable);
             if (is_claimable) {
@@ -94,7 +119,28 @@ App = {
                panel.addClass('unclaimable');
             }
           });
-        }
+          */
+         } else {
+
+             if (amount.gt(0)) {
+
+               panel.find('.unsponsored-display').hide();
+               panel.find('.sponsored-display').show();
+
+               panel.find('.developer').text(developer);
+               panel.find('.sponsor').text(sponsor);
+               panel.find('.amount-eth').text(web3.fromWei(amount, 'ether').toString());
+               panel.addClass('sponsored');
+
+             } else {
+            
+               panel.find('.unsponsored-display').show();
+               panel.find('.sponsored-display').hide();
+
+             }
+
+          }
+        });
       });
     }
 
