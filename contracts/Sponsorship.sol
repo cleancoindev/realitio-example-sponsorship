@@ -31,10 +31,11 @@ contract Sponsorship {
     }
 
     function claim(bytes32 question_id) public {
+        require(bounties[question_id].amount > 0);
         require(isFinalized(question_id));
         address claimer = isMilestoneCompleted(question_id) ? bounties[question_id].developer : bounties[question_id].sponsor;
-        claimer.transfer(bounties[question_id].amount);
         delete (bounties[question_id]);
+        claimer.transfer(bounties[question_id].amount);
     }
 
     function isSponsorable(bytes32 question_id) public view returns (bool) {
